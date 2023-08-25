@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <CheckBox
+        android:id="@+id/uppercaseCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Uppercase Letters"
+        android:checked="true"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp" />
+
+    <CheckBox
+        android:id="@+id/lowercaseCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Lowercase Letters"
+        android:checked="true"
+        android:layout_below="@id/uppercaseCheckBox"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp" />
+
+    <CheckBox
+        android:id="@+id/digitsCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Digits"
+        android:checked="true"
+        android:layout_below="@id/lowercaseCheckBox"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp" />
+
+    <CheckBox
+        android:id="@+id/specialCharsCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Special Characters"
+        android:checked="true"
+        android:layout_below="@id/digitsCheckBox"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp" />
+
+
+
+    <EditText
+        android:id="@+id/generateFromEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Generate from these characters (optional)"
+        android:layout_below="@id/specialCharsCheckBox"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp" />
+
+    <SeekBar
+        android:id="@+id/passwordLengthSeekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="28"
+        android:progress="8"
+        android:layout_below="@id/generateFromEditText"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp" />
+
+    <TextView
+        android:id="@+id/passwordLengthTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="12"
+        android:layout_below="@id/passwordLengthSeekBar"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp" />
+
+    <Button
+        android:id="@+id/generateButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Generate Password"
+        android:layout_below="@id/passwordLengthTextView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp" />
+
+    <TextView
+        android:id="@+id/passwordStrengthTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Password Strength: "
+        android:textStyle="bold"
+        android:layout_below="@id/generateButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/passwordRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/passwordStrengthTextView"
+        android:layout_marginTop="8dp"/>
+</RelativeLayout>
