@@ -1,8 +1,10 @@
 package com.rbppl.passwordgenerator
 
+import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -12,18 +14,18 @@ import java.security.SecureRandom
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var uppercaseCheckBox: CheckBox
-    private lateinit var lowercaseCheckBox: CheckBox
-    private lateinit var digitsCheckBox: CheckBox
-    private lateinit var specialCharsCheckBox: CheckBox
+    lateinit var uppercaseCheckBox: CheckBox
+    lateinit var lowercaseCheckBox: CheckBox
+    lateinit var digitsCheckBox: CheckBox
+    lateinit var specialCharsCheckBox: CheckBox
     private lateinit var generateButton: Button
-    private lateinit var passwordLengthSeekBar: SeekBar
+    lateinit var passwordLengthSeekBar: SeekBar
     private lateinit var passwordLengthTextView: TextView
-    private lateinit var generateFromEditText: EditText
+    lateinit var generateFromEditText: EditText
     private lateinit var passwordStrengthTextView: TextView
     private lateinit var passwordRecyclerView: RecyclerView
 
-    private val generatedPasswords = mutableListOf<String>()
+    val generatedPasswords = mutableListOf<String>()
     private lateinit var passwordAdapter: PasswordAdapter
     private val PREFS_NAME = "GeneratedPasswordsPrefs"
     private val PREFS_KEY_PASSWORDS = "GeneratedPasswords"
@@ -40,9 +42,19 @@ class MainActivity : AppCompatActivity() {
     private val digitChars = "0123456789"
     private val specialChars = "!@#$%^&*()-_=+[]{}|;:',.<>/?"
 
+    val clipboardManager: ClipboardManager by lazy {
+        getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    }
+
+    private val sharedPreferences: SharedPreferences by lazy {
+        getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
 
         uppercaseCheckBox = findViewById(R.id.uppercaseCheckBox)
         lowercaseCheckBox = findViewById(R.id.lowercaseCheckBox)
@@ -90,7 +102,7 @@ class MainActivity : AppCompatActivity() {
                 saveGeneratedPasswords()
                 saveViewState()
             } catch (e: Exception) {
-                Toast.makeText(this@MainActivity, "Select at least one checkbox.", Toast.LENGTH_SHORT).show()
+                showToast("Select at least one checkbox.")
             }
         }
 
@@ -99,7 +111,9 @@ class MainActivity : AppCompatActivity() {
         loadSeekBarProgress()
     }
 
-    private fun generatePassword() {
+
+
+    internal fun generatePassword() {
         val passwordLength = passwordLengthSeekBar.progress + 4
         val availableChars = StringBuilder()
 
@@ -122,7 +136,8 @@ class MainActivity : AppCompatActivity() {
         updatePasswordStrength(passwordStrength)
     }
 
-    private fun updatePasswordStrength(strength: PasswordStrength) {
+    @SuppressLint("SetTextI18n")
+    internal fun updatePasswordStrength(strength: PasswordStrength) {
         passwordStrengthTextView.text = "Password Strength: $strength"
         val color = when (strength) {
             PasswordStrength.WEAK -> R.color.colorWeak
@@ -132,20 +147,23 @@ class MainActivity : AppCompatActivity() {
         passwordStrengthTextView.setTextColor(resources.getColor(color))
     }
 
-    private fun copyToClipboard(text: String) {
-        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val clip = ClipData.newPlainText("password", text)
-        clipboard.setPrimaryClip(clip)
-        Toast.makeText(this, "Password copied to clipboard", Toast.LENGTH_SHORT).show()
+    internal fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
-    private enum class PasswordStrength {
+    fun copyToClipboard(text: String) {
+        val clip = ClipData.newPlainText("password", text)
+        clipboardManager.setPrimaryClip(clip)
+        showToast("Password copied to clipboard")
+    }
+
+    enum class PasswordStrength {
         WEAK, MEDIUM, STRONG
     }
 
     private lateinit var currentPasswordStrength: PasswordStrength
 
-    private fun evaluatePasswordStrength(password: String): PasswordStrength {
+    fun evaluatePasswordStrength(password: String): PasswordStrength {
         val lengthScore = when {
             password.length < 8 -> 0
             password.length in 8..11 -> 1
@@ -166,24 +184,26 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun saveGeneratedPasswords() {
-        val preferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val editor = preferences.edit()
+    fun saveGeneratedPasswords() {
+        val editor = sharedPreferences.edit()
         val passwordsSet = generatedPasswords.toSet()
         editor.putStringSet(PREFS_KEY_PASSWORDS, passwordsSet)
         editor.putString(PREFS_KEY_PASSWORD_STRENGTH, currentPasswordStrength.toString())
         editor.apply()
     }
-
+    override fun onResume() {
+        super.onResume()
+        loadViewState()
+    }
+    @SuppressLint("NotifyDataSetChanged")
     private fun loadGeneratedPasswords() {
-        val preferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val passwordsSet = preferences.getStringSet(PREFS_KEY_PASSWORDS, null)
+        val passwordsSet = sharedPreferences.getStringSet(PREFS_KEY_PASSWORDS, null)
         passwordsSet?.let {
             generatedPasswords.clear()
             generatedPasswords.addAll(it)
             passwordAdapter.notifyDataSetChanged()
         }
-        val strengthString = preferences.getString(PREFS_KEY_PASSWORD_STRENGTH, null)
+        val strengthString = sharedPreferences.getString(PREFS_KEY_PASSWORD_STRENGTH, null)
         strengthString?.let {
             currentPasswordStrength = PasswordStrength.valueOf(it)
             updatePasswordStrength(currentPasswordStrength)
@@ -203,6 +223,7 @@ class MainActivity : AppCompatActivity() {
         editor.apply()
     }
 
+    @SuppressLint("SetTextI18n")
     private fun loadViewState() {
         val preferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
@@ -213,17 +234,26 @@ class MainActivity : AppCompatActivity() {
         generateFromEditText.setText(preferences.getString(PREFS_KEY_GENERATE_FROM_TEXT, ""))
     }
 
-    private fun saveSeekBarProgress(progress: Int) {
-        val preferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val editor = preferences.edit()
+    fun saveSeekBarProgress(progress: Int) {
+        val editor = sharedPreferences.edit()
         editor.putInt(PREFS_KEY_PASSWORD_LENGTH, progress)
         editor.apply()
     }
 
+    @SuppressLint("SetTextI18n")
     private fun loadSeekBarProgress() {
-        val preferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val savedProgress = preferences.getInt(PREFS_KEY_PASSWORD_LENGTH, 0)
+        val savedProgress = sharedPreferences.getInt(PREFS_KEY_PASSWORD_LENGTH, 0)
         passwordLengthSeekBar.progress = savedProgress
         passwordLengthTextView.text = (savedProgress + 4).toString()
+    }
+    companion object {
+        const val PREFS_KEY_PASSWORD_LENGTH = "PasswordLength"
+        const val PREFS_KEY_GENERATE_FROM_TEXT = "GenerateFromText"
+        const val PREFS_KEY_SPECIAL_CHARS = "SpecialChars"
+        const val PREFS_KEY_PASSWORDS = "Passwords"
+        const val PREFS_KEY_PASSWORD_STRENGTH = "PasswordStrength"
+        const val PREFS_KEY_UPPERCASE = "Uppercase"
+        const val PREFS_KEY_LOWERCASE = "Lowercase"
+        const val PREFS_KEY_DIGITS = "Digits"
     }
 }

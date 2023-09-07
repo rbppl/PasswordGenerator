@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">PasswordGenerator</string>
+    <string name="uppercase_letters">Uppercase Letters</string>
+    <string name="lowercase_letters">Lowercase Letters</string>
+    <string name="digits">Digits</string>
+    <string name="special_characters">Special Characters</string>
+    <string name="generate_from_these_characters_optional">Generate from these characters (optional)</string>
+    <string name="_12">12</string>
+    <string name="generate_password">Generate Password</string>
+    <string name="password_strength">Password Strength:</string>
+    <string name="generated_password">Generated Password</string>
+    <string name="copy">Copy</string>
 </resources>
